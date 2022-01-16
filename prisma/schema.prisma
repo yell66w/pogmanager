@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,8 +10,47 @@ datasource db {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  username   String   @unique
-  IGN    String? @unique
+  id  Int @default(autoincrement()) @id
+  username String @unique
+  password String
+  profile Profile? 
+  role Role @relation(fields: [role_id],references: [id])
+  role_id Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
+model Profile {
+  id     Int      @id @default(autoincrement())
+  IGN    String? @unique
+  coins Decimal @db.Decimal(19,4)
+  attendance_points Decimal @db.Decimal(19,4)
+  violations Decimal @db.Decimal(19,4)
+  bonuses Decimal @db.Decimal(19,4)
+  user   User   @relation(fields: [user_id],references: [id])
+  user_id Int 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+model Role {
+  id  Int @default(autoincrement()) @id
+  name String @unique
+  permissions RolesOnPermission[]
+  users User[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+model Permission {
+  id  Int @default(autoincrement()) @id
+  name String @unique
+  roles RolesOnPermission[] 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+model RolesOnPermission {
+  role       Role     @relation(fields: [role_id], references: [id])
+  role_id     Int // relation scalar field (used in the `@relation` attribute above)
+  permission   Permission @relation(fields: [permission_id], references: [id])
+  permission_id Int // relation scalar field (used in the `@relation` attribute above)
+  @@id([role_id, permission_id])
+}
