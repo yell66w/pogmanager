@@ -35,7 +35,7 @@ model Profile {
 model Role {
   id  Int @default(autoincrement()) @id
   name String @unique
-  permissions RolesOnPermission[]
+  permissions PermissionsOnRoles[]
   users User[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -43,11 +43,11 @@ model Role {
 model Permission {
   id  Int @default(autoincrement()) @id
   name String @unique
-  roles RolesOnPermission[] 
+  roles PermissionsOnRoles[] 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
-model RolesOnPermission {
+model PermissionsOnRoles {
   role       Role     @relation(fields: [role_id], references: [id])
   role_id     Int // relation scalar field (used in the `@relation` attribute above)
   permission   Permission @relation(fields: [permission_id], references: [id])
