@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Strategy, ExtractJwt } from "passport-jwt";
+import { userSelect } from "../controllers/AuthController";
 const prisma = new PrismaClient();
 
 let opts: any = {};
@@ -13,14 +14,7 @@ export default (passport: any) => {
           where: {
             id: jwt_payload.id,
           },
-          select: {
-            username: true,
-            id: true,
-            role: true,
-            created_at: true,
-            updated_at: true,
-            profile: true,
-          },
+          select: userSelect,
         });
         if (user) {
           return done(null, user);

@@ -1,8 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { userInfo } from "os";
+import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
+
+export const userSelect = {
+  username: true,
+  id: true,
+  role: true,
+  created_at: true,
+  updated_at: true,
+  profile: true,
+};
 
 class AuthController {
   static login = async (req: Request, res: Response) => {
@@ -20,7 +29,7 @@ class AuthController {
       if (!user) {
         return res.status(404).send("Incorrect username or password.");
       }
-      if (user?.password !== password) {
+      if (!this.isPasswordValid(password, user.password)) {
         return res.status(401).send("Incorrect username or password.");
       }
       if (process.env.JWT_SECRET) {
@@ -28,7 +37,7 @@ class AuthController {
           expiresIn: "1h",
         });
         return res.status(200).send({
-          token: `Bearer ${token}`,
+          token: `${token}`,
           user: {
             id: user.id,
             role_id: user.role_id,
@@ -53,13 +62,14 @@ class AuthController {
       const user = await prisma.user.create({
         data: {
           username,
-          password,
+          password: this.hashPassword(password),
           profile: {
             create: {
               IGN,
             },
           },
         },
+        select: userSelect,
       });
       return res.status(200).send(user);
     } catch (error: any) {
@@ -87,9 +97,19 @@ class AuthController {
     let data = {};
 
     if (old_password && new_password) {
-      data = {
-        password: new_password,
-      };
+      const _user = await prisma.user.findUnique({
+        where: { id: authUser.id },
+      });
+      if (
+        _user?.password &&
+        this.isPasswordValid(old_password, _user?.password)
+      ) {
+        data = {
+          password: this.hashPassword(new_password),
+        };
+      } else {
+        return res.status(401).send("Invalid Password");
+      }
     }
     if (IGN) {
       data = {
@@ -111,15 +131,21 @@ class AuthController {
         where: {
           id: authUser.id,
         },
-        include: {
-          profile: true,
-        },
+        select: userSelect,
       });
       return res.status(200).send(user);
     } catch (error: any) {
       return res.status(400).send(error.message);
     }
   };
+
+  static isPasswordValid(unencryptedPassword: string, password: string) {
+    return bcrypt.compareSync(unencryptedPassword, password);
+  }
+
+  static hashPassword(password: string) {
+    return bcrypt.hashSync(password, 8);
+  }
 }
 
 export default AuthController;
