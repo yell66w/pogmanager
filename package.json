@@ -15,6 +15,7 @@
   "scripts": {
     "seed": "ts-node prisma/seed.ts",
     "migrate": "npx prisma migrate dev --name",
-    "reset": "npx prisma migrate reset"
+    "reset": "npx prisma migrate reset",
+    "reset:migrate": "npx prisma migrate reset && npx prisma migrate dev --name"
   }
 }
