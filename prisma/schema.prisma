@@ -22,11 +22,11 @@ model User {
 
 model Profile {
   id     Int      @id @default(autoincrement())
-  IGN    String? @unique
-  coins Decimal @db.Decimal(19,4)
-  attendance_points Decimal @db.Decimal(19,4)
-  violations Decimal @db.Decimal(19,4)
-  bonuses Decimal @db.Decimal(19,4)
+  IGN    String @unique
+  coins Decimal @db.Decimal(19,4) @default(0.0)
+  attendance_points Decimal @db.Decimal(19,4) @default(0.0)
+  violations Decimal @db.Decimal(19,4) @default(0.0)
+  bonuses Decimal @db.Decimal(19,4) @default(0.0)
   user   User   @relation(fields: [user_id],references: [id])
   user_id Int 
   created_at DateTime @default(now())
