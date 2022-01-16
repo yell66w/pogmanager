@@ -14,8 +14,8 @@ model User {
   username String @unique
   password String
   profile Profile? 
-  role Role @relation(fields: [role_id],references: [id])
-  role_id Int
+  role Role? @relation(fields: [role_id],references: [id])
+  role_id Int?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
